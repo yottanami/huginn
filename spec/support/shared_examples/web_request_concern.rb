@@ -67,6 +67,18 @@ shared_examples_for WebRequestConcern do
       expect(agent).not_to be_valid
     end
 
+    it "should validate basic_auth after interpolating it" do
+      users(:jane).user_credentials.create! credential_name: "basic_auth", credential_value: "foo:bar"
+      agent.options['basic_auth'] = "{% credential basic_auth %}"
+      expect(agent).to be_valid
+
+      users(:jane).user_credentials.create! credential_name: "no_colon", credential_value: "s3cretPW"
+      agent.options['basic_auth'] = "{% credential no_colon %}"
+      expect(agent).not_to be_valid
+      expect(agent.errors[:base]).to include('bad value for basic_auth: "{% credential no_colon %}"')
+      expect(agent.errors.full_messages.join).not_to include("s3cretPW")
+    end
+
     it "should validate disable_ssl_verification" do
       agent.options['disable_ssl_verification'] = nil
       expect(agent).to be_valid
