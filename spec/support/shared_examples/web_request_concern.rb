@@ -72,9 +72,11 @@ shared_examples_for WebRequestConcern do
       agent.options['basic_auth'] = "{% credential basic_auth %}"
       expect(agent).to be_valid
 
-      users(:jane).user_credentials.create! credential_name: "no_colon", credential_value: "blah"
+      users(:jane).user_credentials.create! credential_name: "no_colon", credential_value: "s3cretPW"
       agent.options['basic_auth'] = "{% credential no_colon %}"
       expect(agent).not_to be_valid
+      expect(agent.errors[:base]).to include('bad value for basic_auth: "{% credential no_colon %}"')
+      expect(agent.errors.full_messages.join).not_to include("s3cretPW")
     end
 
     it "should validate disable_ssl_verification" do

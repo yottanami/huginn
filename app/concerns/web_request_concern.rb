@@ -80,8 +80,9 @@ module WebRequestConcern
 
     begin
       basic_auth_credentials(interpolated['basic_auth'])
-    rescue ArgumentError => e
-      errors.add(:base, e.message)
+    rescue ArgumentError
+      # Report the option as written: the interpolated value can contain a credential.
+      errors.add(:base, "bad value for basic_auth: #{options['basic_auth'].inspect}")
     end
 
     if (encoding = options['force_encoding']).present?
